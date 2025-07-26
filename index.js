@@ -38,6 +38,11 @@ app.use("/api/cart", cartRoute);
 app.use(logger);
 
 
+app.get("/",(req,res)=>{
+  console.log("Hello world!");
+  
+})
+
 //start server
 app.listen(PORT, () => {
   console.log(`App is running on PORT ${PORT}`);
