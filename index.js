@@ -39,7 +39,8 @@ app.use(logger);
 
 
 app.get("/",(req,res)=>{
-  console.log("Hello world!");
+  res.send("Hello world!");
+    console.log("hello world!");   
   
 })
 
