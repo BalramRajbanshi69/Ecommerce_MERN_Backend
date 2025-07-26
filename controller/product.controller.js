@@ -1,6 +1,6 @@
 const ProductModal = require("../model/ProductModal");
 
-// const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000"; 
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000"; 
 
 exports.createProduct = async (req, res) => {
     const file = req.file;
@@ -10,7 +10,7 @@ exports.createProduct = async (req, res) => {
         imageFullPath = "https://plus.unsplash.com/premium_photo-1664474619075-644dd191935f?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8aW1hZ2V8ZW58MHx8MHx8fDA%3D";
     } else {
 
-        imageFullPath = `/uploads/${req.file.filename}`;
+        imageFullPath = `${BACKEND_URL}/uploads/${req.file.filename}`;
     }
 
     const { name, description, price, inStock } = req.body;
