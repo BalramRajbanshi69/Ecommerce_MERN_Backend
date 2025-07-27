@@ -35,4 +35,4 @@ lerna-debug.log*
 
 
 # Upload folder (Multer)
-/uploads
+# /uploads

@@ -41,7 +41,8 @@ router.post(
         },
       };
 
-      res.json({ msg: "Registration successful", user }); 
+          const token = await jwt.sign(data, JWT_SECRET);
+      res.json({ msg: "Registration successful", user,token }); 
     } catch (error) {
       console.error(error); 
       res.status(500).send("internal server error");
