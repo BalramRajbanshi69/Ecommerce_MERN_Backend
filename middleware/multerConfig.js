@@ -10,8 +10,7 @@ const storage = multer.diskStorage({
         return
     }
     
-    // cb(null, './uploads') 
-    cb(null, path.join(__dirname, '..', 'uploads'));
+    cb(null, './uploads') 
   },
   filename: function (req, file, cb) {
     cb(null, Date.now()+"-"+ file.originalname)   // Date.now will show the date in millisecond to override multiple same file upload
