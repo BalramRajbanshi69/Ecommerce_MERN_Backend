@@ -1,4 +1,7 @@
 const ProductModal = require("../model/ProductModal");
+const fs = require("fs").promises;
+const path = require("path");
+const User = require("../model/User");
 
 // const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000"; 
 
@@ -86,26 +89,48 @@ exports.updateProduct = async (req, res) => {
 
 
 
-
-
-// delete product 
 exports.deleteProduct = async (req, res) => {
-  try {
-    const id = req.params.id;
-    let product = await ProductModal.findByIdAndDelete(id);
-    if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+    try {
+        const id = req.params.id;
+        if (!id) {
+            return res.status(400).json({ error: "Please provide id" });
+        }
+
+        const product = await ProductModal.findByIdAndDelete(id);
+        if (!product) {
+            return res.status(404).json({ error: "Product not found" });
+        }
+
+        if (!product.user || product.user.toString() !== req.user.id) {
+            return res.status(401).json({ error: "You are not authorized" });
+        }
+
+        // Delete associated image file if it exists and is not the default Unsplash URL
+        if (product.productImage && product.productImage[0] && !product.productImage[0].startsWith("https://")) {
+         const filePath = path.join(__dirname, "..", product.productImage[0]);  
+             try {
+                await fs.unlink(filePath);
+                console.log("File deleted successfully:", filePath);
+            } catch (err) {
+                console.error("Error deleting file:", err);
+            }
+        }
+
+         await User.updateMany(
+            {}, // Match all users
+            { $pull: { cart: { product: id } } } // Pull (remove) the item from the cart array where product matches the deleted product's ID
+        );
+
+
+        res.status(200).json({
+            success: true,
+            message: "Product deleted successfully",
+        });
+    } catch (error) {
+        console.error("Delete product error:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
-    if (!product.user || product.user.toString() !== req.user.id) {
-      return res.status(401).json({ error: "You are not authorized" });
-    }
-    res
-      .status(200)
-      .json({ success: true, message: "Product deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
+};
 
 
 
