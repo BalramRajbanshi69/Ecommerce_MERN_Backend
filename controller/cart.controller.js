@@ -16,7 +16,7 @@ exports.addToCart = async(req,res)=>{
 
     const user = await User.findById(userId);
     // check if that productId exists or not , if exist increase quantity by 1 , if not productId
-    const existingCartItem = user.cart.find((item)=>item.product.equals(productId));
+    const existingCartItem = user?.cart.find((item)=>item.product.equals(productId));
     if(existingCartItem){
         existingCartItem.quantity+=1
     }else{
