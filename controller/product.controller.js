@@ -211,12 +211,6 @@
 
 
 
-
-
-
-
-
-
 const ProductModal = require("../model/ProductModal");
 const User = require("../model/User");
 const cloudinary = require("cloudinary").v2;
@@ -334,37 +328,37 @@ exports.deleteProduct = async (req, res) => {
       return res.status(400).json({ error: "Please provide product ID" });
     }
 
-    // Find the product first to get its image publicId before deleting the document
     const product = await ProductModal.findById(id);
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    // Security check
-    if (!product.user || product.user.toString() !== req.user.id) {
-      return res.status(401).json({ error: "You are not authorized" });
-    }
+    // Extract the image URL and public_id from the product data
+    const oldProductImageURL = product.productImage[0];
 
-    // Delete the image from Cloudinary if it exists and is not the default image
-    if (product.publicId && !product.productImage[0].startsWith("https://plus.unsplash.com")) {
+    // Delete the image from Cloudinary, but only if it's not the default image
+    if (oldProductImageURL && !oldProductImageURL.startsWith("https://plus.unsplash.com")) {
+      const parts = oldProductImageURL.split('/');
+      const filenameWithExtension = parts[parts.length - 1];
+      const oldPublicId = parts[parts.length - 2] + '/' + filenameWithExtension.split('.')[0];
+      
       try {
-        await cloudinary.uploader.destroy(product.publicId);
-        console.log(`Successfully deleted image from Cloudinary: ${product.publicId}`);
+        await cloudinary.uploader.destroy(oldPublicId);
+        console.log(`Successfully deleted image from Cloudinary with public_id: ${oldPublicId}`);
       } catch (err) {
-        console.error(`Error deleting image from Cloudinary: ${product.publicId}`, err);
+        console.error(`Error deleting image from Cloudinary with public_id: ${oldPublicId}:`, err);
       }
     }
 
-    // Now delete the product from the database
+    // Delete the product from the database
     await ProductModal.findByIdAndDelete(id);
 
-    // Clean up references to the deleted product in other collections
     // Remove the product from all user carts
     await User.updateMany(
       {},
       { $pull: { cart: { product: id } } }
     );
-    
+
 
     res.status(200).json({
       success: true,
@@ -375,6 +369,7 @@ exports.deleteProduct = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
 
 
 
