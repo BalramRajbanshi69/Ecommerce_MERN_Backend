@@ -42,18 +42,7 @@
 
     
 
-//     // get all products
-// exports.getAllProducts = async (req, res) => {
-//   try {
-//     const product = await ProductModal.find();
-//     res.json({
-//       message: "All products fetched successfully",
-//       data:product
-//     });
-//   } catch (error) {
-//     res.status(500).send("internal server error");
-//   }
-// };
+
 
 
 
@@ -425,3 +414,15 @@ exports.getProductById = async (req, res) => {
 }
 
 
+    // get all products
+exports.getAllProducts = async (req, res) => {
+  try {
+    const product = await ProductModal.find();
+    res.json({
+      message: "All products fetched successfully",
+      data:product
+    });
+  } catch (error) {
+    res.status(500).send("internal server error");
+  }
+};
