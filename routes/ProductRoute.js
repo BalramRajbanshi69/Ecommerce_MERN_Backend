@@ -1,8 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const FetchUser = require("../middleware/FetchUser");
-const { multer, storage } = require("../middleware/multerConfig"); 
-const upload = multer({ storage: storage });
+// const { multer, storage } = require("../middleware/multerConfig"); 
+// const upload = multer({ storage: storage });
+
+const upload = require("../middleware/multerConfig")
 
 const {
   getUserProducts,
