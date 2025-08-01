@@ -270,7 +270,7 @@ exports.updateProduct = async (req, res) => {
     const { id } = req.params;
     const { name, description, price, inStock } = req.body;
 
-    if (!productName || !description || !price  || !inStock || !id) {
+    if (!name || !description || !price  || !inStock || !id) {
       return res.status(400).json({
         message: "Please provide all required fields"
       });
@@ -306,7 +306,7 @@ exports.updateProduct = async (req, res) => {
       newImageURL = req.file.path;
     }
 
-    const datas = await Product.findByIdAndUpdate(id, {
+    const datas = await ProductModal.findByIdAndUpdate(id, {
       name,
       description,
       price,
