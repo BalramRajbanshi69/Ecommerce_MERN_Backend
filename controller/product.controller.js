@@ -267,52 +267,62 @@ exports.createProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
-    const id = req.params.id;
-    const { name, price, description, inStock } = req.body;
-    const newProductData = {};
+    const { id } = req.params;
+    const { name, description, price, inStock } = req.body;
 
-    let product = await ProductModal.findById(id);
-    if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+    if (!productName || !description || !price  || !inStock || !id) {
+      return res.status(400).json({
+        message: "Please provide all required fields"
+      });
     }
 
+    const oldData = await ProductModal.findById(id);
+    if (!oldData) {
+      return res.status(404).json({
+        message: "No data found with that id"
+      });
+    }
 
-    // Update basic fields if they are provided in the request body
-    if (name) newProductData.name = name;
-    if (price) newProductData.price = price;
-    if (description) newProductData.description = description;
-    if (inStock !== undefined) newProductData.inStock = Number(inStock);
+    const oldProductImageURL = oldData.productImage[0];
+    let newImageURL = oldProductImageURL;
 
-    // Handle a new image upload
-    if (req.file) {
-      // Check if the old image was a Cloudinary image and not the default one
-      if (product.publicId && !product.productImage[0].startsWith("https://plus.unsplash.com")) {
+    if (req.file) { // A new file was uploaded to Cloudinary
+      // Extract the public_id from the old image URL
+      const parts = oldProductImageURL.split('/');
+      const filenameWithExtension = parts[parts.length - 1]; // e.g., 'product-123456789.jpg'
+      const oldPublicId = parts[parts.length - 2] + '/' + filenameWithExtension.split('.')[0]; // e.g., 'e-commerce-products/product-123456789'
+      
+      // Delete the old file from Cloudinary, but only if it's not the default image
+      if (!oldProductImageURL.startsWith("https://plus.unsplash.com")) {
         try {
-          // Delete the old image from Cloudinary using its publicId
-          await cloudinary.uploader.destroy(product.publicId);
-          console.log(`Old image deleted from Cloudinary: ${product.publicId}`);
+          await cloudinary.uploader.destroy(oldPublicId);
+          console.log("Old image deleted from Cloudinary successfully");
         } catch (err) {
-          console.error(`Error deleting old image from Cloudinary: ${product.publicId}`, err);
-          // Continue with the update even if old image deletion fails
+          console.error("Error deleting old image from Cloudinary:", err);
         }
       }
-
-      // Update with the new image's details
-      newProductData.productImage = [req.file.path]; // New Cloudinary URL
-      newProductData.publicId = req.file.filename;   // New Cloudinary public_id
+      
+      // Set the new image URL from the uploaded file
+      newImageURL = req.file.path;
     }
 
-    // Perform the update on the database
-    product = await ProductModal.findByIdAndUpdate(
-      id,
-      { $set: newProductData },
-      { new: true } // Return the updated document
-    );
+    const datas = await Product.findByIdAndUpdate(id, {
+      name,
+      description,
+      price,
+      inStock,
+      productImage: [newImageURL]
+    }, {
+      new: true,
+    });
 
-    res.status(200).json({ success: true, data: product });
+    res.status(200).json({
+      message: "Product updated successfully",
+      data: datas
+    });
   } catch (error) {
-    console.error('Update product error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Edit product error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
