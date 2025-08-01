@@ -42,11 +42,15 @@ const storage = new CloudinaryStorage({
       // You can generate a unique public_id here if needed
       return `product-${Date.now()}`;
     },
+    transformation: [
+  { width: 800, height: 800, crop: "limit", quality: "auto" }, // Resize to max 800x800, auto quality
+]
   },
 });
 
 const upload = multer({
   storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
     const allowedFileTypes = ["image/jpg", "image/png", "image/jpeg"];
     if (allowedFileTypes.includes(file.mimetype)) {
