@@ -276,10 +276,6 @@ exports.updateProduct = async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    // Security check: only the product creator can edit it.
-    if (!product.user || product.user.toString() !== req.user.id) {
-      return res.status(401).json({ error: "You are not authorized" });
-    }
 
     // Update basic fields if they are provided in the request body
     if (name) newProductData.name = name;
