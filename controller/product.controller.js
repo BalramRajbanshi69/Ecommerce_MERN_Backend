@@ -230,7 +230,6 @@
 
 const ProductModal = require("../model/ProductModal");
 const User = require("../model/User");
-const Order = require("../model/Order"); 
 const cloudinary = require("cloudinary").v2;
 
 exports.createProduct = async (req, res) => {
@@ -377,11 +376,6 @@ exports.deleteProduct = async (req, res) => {
       { $pull: { cart: { product: id } } }
     );
     
-    // Remove the product from all existing orders
-    await Order.updateMany(
-      { 'items.product': id },
-      { $pull: { items: { product: id } } }
-    );
 
     res.status(200).json({
       success: true,
