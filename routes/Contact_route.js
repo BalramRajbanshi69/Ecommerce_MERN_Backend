@@ -1,12 +1,16 @@
 const express = require('express');
 const Contact = require('../model/Contact-model');
 const FetchUser = require('../middleware/FetchUser');
+const { sendEmail } = require('../services/sendEmail');
 const router = express.Router();
 
 
 router.post('/contactsubmit',FetchUser, async(req,res)=>{
   try {
-    const {fullname,email,phone,subject,message} = req.body
+    const {fullname,email,phone,subject,message} = req.body;
+    if (!fullname || !email || !phone || !subject || !message) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
     const contact = new Contact({
       user:req.user.id,
       fullname,
@@ -16,6 +20,13 @@ router.post('/contactsubmit',FetchUser, async(req,res)=>{
       message
     });
     await contact.save()
+    await sendEmail({
+      fullname,
+      email,
+      phone,
+      subject,
+      message
+    })
     res.status(201).json({message: 'Contact submitted successfully'})
   } catch (error) {
     console.error('Contact submission error:', error);
